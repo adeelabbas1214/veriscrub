@@ -1,7 +1,8 @@
 'use client';
 
-import PrivacyMeshCanvas from '../components/PrivacyMeshCanvas';
 import { useState } from 'react';
+import PrivacyMeshCanvas from '../components/PrivacyMeshCanvas';
+import Logo from '../components/Logo';
 import { buildDocumentPipeline, DocumentVariants } from '../lib/pipeline';
 
 interface UploadMetrics {
@@ -84,18 +85,13 @@ export default function Home() {
 
   return (
     <main className="relative min-h-screen bg-[#07090e] text-slate-100 antialiased selection:bg-emerald-500 selection:text-black">
+      {/* Background Motion Canvas */}
       <PrivacyMeshCanvas />
 
-      <nav className="relative z-10 border-b border-slate-800/80 bg-slate-950/60 backdrop-blur-md sticky top-0 z-50">
+      {/* Top Navbar */}
+      <nav className="relative z-10 border-b border-slate-800/80 bg-slate-950/60 backdrop-blur-md sticky top-0">
         <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center font-black text-black text-sm tracking-wider shadow-lg shadow-emerald-500/20">
-              VS
-            </div>
-            <span className="font-bold tracking-tight text-lg text-slate-100">
-              Veri<span className="text-emerald-400">Scrub</span>
-            </span>
-          </div>
+          <Logo />
           <div className="flex items-center space-x-2 text-xs font-medium text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
             <span>Zero-Trust Shield Active</span>
@@ -103,7 +99,7 @@ export default function Home() {
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 py-12 space-y-10">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-12 space-y-10">
         {/* Header */}
         <section className="text-center max-w-xl mx-auto space-y-2">
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight bg-gradient-to-b from-white to-slate-300 bg-clip-text text-transparent">
@@ -281,7 +277,11 @@ export default function Home() {
 
               <div className="flex items-center justify-between text-xs text-slate-500 px-1 pt-1">
                 <span>Drag divider horizontally to inspect redactions</span>
-                {metrics && <span>{metrics.dimensions} • {(metrics.rawBytes / 1024).toFixed(1)} KB</span>}
+                {metrics && (
+                  <span>
+                    {metrics.dimensions} • {(metrics.rawBytes / 1024).toFixed(1)} KB
+                  </span>
+                )}
               </div>
             </div>
           </section>
