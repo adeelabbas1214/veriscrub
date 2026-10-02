@@ -15,6 +15,7 @@ export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [results, setResults] = useState<DocumentVariants | null>(null);
   const [metrics, setMetrics] = useState<UploadMetrics | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +82,36 @@ export default function Home() {
     if (activeTab === 'pixel') return results.auditPixelated;
     if (activeTab === 'blur') return results.auditBlurred;
     return results.scannerContrast;
+  };
+
+  const handleDownload = async () => {
+    const url = getCurrentUrl();
+    if (!url) return;
+
+    try {
+      setDownloading(true);
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const baseName = metrics?.fileName
+        ? metrics.fileName.replace(/\.[^/.]+$/, '')
+        : 'veriscrub_document';
+      const downloadName = `${baseName}_${activeTab}_sanitized.jpg`;
+
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = downloadName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      // Fallback: direct browser navigation if fetch is blocked
+      window.open(url, '_blank');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -213,16 +244,41 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Action Button */}
-              <button
-                onClick={() => window.open(getCurrentUrl(), '_blank')}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-xl border border-slate-700 transition-all flex items-center gap-1.5"
-              >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Open Full Asset
-              </button>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => window.open(getCurrentUrl(), '_blank')}
+                  className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-xl border border-slate-700 transition-all flex items-center gap-1.5"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                  <span>Open Full Asset</span>
+                </button>
+
+                <button
+                  onClick={handleDownload}
+                  disabled={downloading}
+                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-black text-xs font-semibold rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                >
+                  {downloading ? (
+                    <>
+                      <svg className="animate-spin h-3.5 w-3.5 text-black" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                      </svg>
+                      <span>Downloading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      <span>Download Sanitized</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
             {/* Split View Interactive Slider */}
